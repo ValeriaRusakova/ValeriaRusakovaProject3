@@ -1,0 +1,21 @@
+{
+  "id": "c4c5cf83-0872-45f5-b2da-6d5d0a2d9d72",
+  "name": "Valeria Rusakova Project 3 Local",
+  "values": [
+    {
+      "key": "userToken",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2026-07-01T00:00:00.000Z",
+  "_postman_exported_using": "ChatGPT"
+}
