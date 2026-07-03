@@ -1,0 +1,111 @@
+/* ai-mcp.css -- AiPage + McpPage */
+
+.ai-mcp-page {
+  display:         flex;
+  justify-content: center;
+  padding:         calc(var(--navbar-height) + var(--sp-10)) var(--sp-6) var(--sp-12);
+}
+
+.ai-mcp-card {
+  width:          100%;
+  max-width:      680px;
+  padding:        var(--sp-10) var(--sp-8);
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--sp-6);
+  align-self:     flex-start;
+  background:     var(--surface);
+  border:         1px solid var(--border);
+  border-radius:  var(--radius-lg);
+  box-shadow:     var(--shadow-md);
+}
+
+.ai-heading h1,
+.mcp-heading h1 {
+  font-family:    var(--font-display);
+  font-size:      var(--text-3xl);
+  font-weight:    700;
+  letter-spacing: -0.02em;
+  margin-bottom:  var(--sp-2);
+  color:          var(--text);
+}
+.ai-heading p,
+.mcp-heading p { color: var(--text-muted); font-size: var(--text-sm); line-height: 1.65; }
+
+.ai-input-row { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+.ai-input-row input  { flex: 1; min-width: 200px; }
+.ai-input-row button { flex-shrink: 0; height: 46px; }
+
+.mcp-input-col { display: flex; flex-direction: column; gap: var(--sp-3); }
+.mcp-input-col textarea { min-height: 96px; resize: vertical; }
+.mcp-input-col button   { align-self: flex-end; height: 46px; }
+
+.ai-thinking,
+.mcp-thinking {
+  display: flex; align-items: center; gap: var(--sp-2);
+  color: var(--text-muted); font-size: var(--text-sm); font-style: italic;
+}
+.dots span { animation: blink 1.2s infinite both; }
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%, 80%, 100% { opacity: 0; } 40% { opacity: 1; } }
+
+.ai-result-card,
+.mcp-result-card {
+  padding:        var(--sp-6);
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--sp-4);
+  animation:      fadeIn var(--t-base) ease;
+  background:     var(--surface-soft);
+  border:         1px solid var(--border);
+  border-radius:  var(--radius);
+}
+
+.ai-result-header,
+.mcp-result-header {
+  border-bottom:  1px solid var(--border);
+  padding-bottom: var(--sp-4);
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--sp-1);
+}
+.ai-result-label,
+.mcp-result-label {
+  font-size:      var(--text-xs);
+  color:          var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight:    600;
+}
+
+.ai-result-dest {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl); font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.01em;
+}
+.mcp-result-question { font-size: var(--text-base); font-weight: 600; color: var(--text); font-style: italic; }
+
+.ai-result-text,
+.mcp-result-text { line-height: 1.8; font-size: var(--text-sm); white-space: pre-wrap; color: var(--text-secondary); }
+
+.ai-clear-btn,
+.mcp-clear-btn {
+  align-self:    flex-start;
+  background:    var(--surface);
+  color:         var(--text-secondary);
+  border:        1px solid var(--border-strong);
+  font-size:     var(--text-xs);
+  height:        34px;
+  padding:       0 var(--sp-4);
+  border-radius: var(--radius-sm);
+}
+.ai-clear-btn:hover,
+.mcp-clear-btn:hover { background: var(--surface-soft); color: var(--text); }
+
+@media (max-width: 500px) {
+  .ai-mcp-card     { padding: var(--sp-8) var(--sp-5); }
+  .ai-input-row    { flex-direction: column; }
+  .ai-input-row button, .mcp-input-col button { width: 100%; }
+}

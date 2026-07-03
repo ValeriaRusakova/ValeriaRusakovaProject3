@@ -6,7 +6,8 @@ export const register = async (req: Request<unknown, unknown, AuthRegisterBody>,
   try {
     const result = await registerUser(req.body);
     res.status(result.status).json(result.body);
-  } catch {
+  } catch (err) {
+    console.error('Registration error:', err);
     res.status(500).json({ message: 'Registration failed' });
   }
 };
@@ -15,7 +16,8 @@ export const login = async (req: Request<unknown, unknown, AuthLoginBody>, res: 
   try {
     const result = await loginUser(req.body);
     res.status(result.status).json(result.body);
-  } catch {
+  } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ message: 'Login failed' });
   }
 };

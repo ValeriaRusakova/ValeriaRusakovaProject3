@@ -47,7 +47,10 @@ export const vacationById = async (req: AuthenticatedRequest, res: Response): Pr
 
 export const addVacation = async (req: Request<unknown, unknown, VacationUpsertBody>, res: Response): Promise<void> => {
   try {
-    const result = await createVacation(req.body);
+    const file = (req as Request & { file?: Express.Multer.File }).file;
+    const imageFilename = file ? file.filename : (req.body.image_filename ?? null);
+    const body: VacationUpsertBody = { ...req.body, image_filename: imageFilename };
+    const result = await createVacation(body);
     res.status(result.status).json(result.body);
   } catch {
     res.status(500).json({ message: 'Failed to create vacation' });
@@ -56,7 +59,10 @@ export const addVacation = async (req: Request<unknown, unknown, VacationUpsertB
 
 export const editVacation = async (req: Request<{ id: string }, unknown, VacationUpsertBody>, res: Response): Promise<void> => {
   try {
-    const result = await updateVacation(Number(req.params.id), req.body);
+    const file = (req as Request & { file?: Express.Multer.File }).file;
+    const imageFilename = file ? file.filename : (req.body.image_filename ?? null);
+    const body: VacationUpsertBody = { ...req.body, image_filename: imageFilename };
+    const result = await updateVacation(Number(req.params.id), body);
     res.status(result.status).json(result.body);
   } catch {
     res.status(500).json({ message: 'Failed to update vacation' });

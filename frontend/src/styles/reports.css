@@ -1,0 +1,127 @@
+/* reports.css -- Admin Reports */
+
+.reports-page h1 {
+  font-family:    var(--font-display);
+  font-size:      var(--text-4xl);
+  font-weight:    700;
+  letter-spacing: -0.02em;
+  color:          var(--text);
+}
+@media (max-width: 640px) { .reports-page h1 { font-size: var(--text-3xl); } }
+
+.reports-header {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     flex-end;
+  margin-bottom:   var(--sp-8);
+  flex-wrap:       wrap;
+  gap:             var(--sp-4);
+}
+.reports-header-actions { display: flex; gap: var(--sp-3); align-items: center; }
+
+/* Summary cards */
+.summary-cards {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:                   var(--sp-4);
+  margin-bottom:         var(--sp-8);
+}
+@media (max-width: 640px) { .summary-cards { grid-template-columns: 1fr; } }
+@media (min-width: 641px) and (max-width: 800px) { .summary-cards { grid-template-columns: repeat(2, 1fr); } }
+
+.summary-card {
+  padding:        var(--sp-6);
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--sp-1);
+  text-align:     center;
+  background:     var(--surface);
+  border:         1px solid var(--border);
+  border-radius:  var(--radius);
+  box-shadow:     var(--shadow-sm);
+}
+.summary-value {
+  font-family: var(--font-display);
+  font-size:   var(--text-4xl);
+  font-weight: 700;
+  line-height: 1.1;
+  color:       var(--accent);
+}
+.summary-value.top-dest {
+  font-size: var(--text-xl);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--text);
+}
+.summary-label {
+  font-size:      var(--text-xs);
+  color:          var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight:    600;
+}
+
+/* Chart panel */
+.chart          {
+  padding: var(--sp-8);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+.chart-title    {
+  font-family: var(--font-display);
+  font-size: var(--text-xl); font-weight: 700;
+  margin-bottom: var(--sp-1);
+  color: var(--text);
+}
+.chart-subtitle { font-size: var(--text-xs); color: var(--text-muted); margin-bottom: var(--sp-6); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Bars */
+.bar-chart  { display: flex; flex-direction: column; gap: var(--sp-3); }
+.bar-item   { display: flex; align-items: center; gap: var(--sp-4); }
+
+.bar-label {
+  min-width: 140px; max-width: 140px;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-align: right; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  flex: 1; position: relative;
+  height: 38px;
+  background: var(--surface-soft);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid var(--border-soft);
+}
+
+.bar-fill {
+  height: 100%;
+  width: var(--bar-width, 0%);
+  background: var(--accent-gradient);
+  border-radius: var(--radius-sm);
+  animation: growBar 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes growBar { from { width: 0; } to { width: var(--bar-width, 100%); } }
+
+.bar-value {
+  position:  absolute;
+  right:     var(--sp-3);
+  top:       50%;
+  transform: translateY(-50%);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color:     #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+
+@media (max-width: 500px) {
+  .bar-label      { min-width: 90px; max-width: 90px; font-size: var(--text-xs); }
+  .chart          { padding: var(--sp-5); }
+  .reports-header { flex-direction: column; align-items: flex-start; }
+}

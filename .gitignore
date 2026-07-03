@@ -1,6 +1,8 @@
 node_modules/
 dist/
 mysql_data/
+frontend/node_modules/
+frontend/dist/
 
 # Generated build artifacts in the repo root
 index.js
@@ -11,6 +13,7 @@ index.d.ts.map
 # Environment and local secrets
 .env
 .env.*
+test-users.md
 
 # Logs
 npm-debug.log*
