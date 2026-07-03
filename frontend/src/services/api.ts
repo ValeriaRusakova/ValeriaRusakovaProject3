@@ -243,7 +243,7 @@ export async function getAiRecommendation(destination: string): Promise<string> 
 // ── MCP ───────────────────────────────────────────────────────────────────────
 
 export async function askMcp(question: string): Promise<string> {
-  const res = await fetch(`${BASE_URL}/mcp`, {
+  const res = await fetch(`${BASE_URL}/mcp/question`, {
     method: 'POST',
     headers: { ...authHeaders(), 'Content-Type': 'application/json' },
     body: JSON.stringify({ question }),
