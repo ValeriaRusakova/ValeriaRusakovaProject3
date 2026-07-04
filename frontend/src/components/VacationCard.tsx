@@ -52,6 +52,7 @@ export default function VacationCard({
 }: Props) {
   // Controls the inline "Are you sure?" confirmation row inside this card.
   const [confirming, setConfirming] = useState(false);
+  const [descriptionOpen, setDescriptionOpen] = useState(false);
 
   // Empty string tells CardMedia to skip the <img> and show the placeholder.
   const imageUrl = vacation.imageFileName
@@ -59,6 +60,7 @@ export default function VacationCard({
     : '';
 
   const status = getStatus(vacation.startDate, vacation.endDate);
+  const canToggleDescription = !isAdmin && vacation.description.length > 180;
 
   function handleDeleteClick() {
     setConfirming(true); // show inline confirm
@@ -84,7 +86,19 @@ export default function VacationCard({
 
       <div className="card-body">
         <h3>{vacation.destination}</h3>
-        <p className="card-desc">{vacation.description}</p>
+        <p className={`card-desc${descriptionOpen ? ' expanded' : ''}`}>
+          {vacation.description}
+        </p>
+        {canToggleDescription && (
+          <button
+            type="button"
+            className="card-desc-toggle"
+            onClick={() => setDescriptionOpen(open => !open)}
+            aria-expanded={descriptionOpen}
+          >
+            {descriptionOpen ? 'Show less' : 'Show more'}
+          </button>
+        )}
 
         <div className="card-meta">
           <span className="card-dates">

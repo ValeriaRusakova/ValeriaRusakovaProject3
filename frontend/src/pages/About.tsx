@@ -90,7 +90,7 @@ export default function About() {
           <div className="dev-info">
             <p className="dev-name">Valeria Rusakova</p>
             <p className="dev-role">Full Stack Web Developer</p>
-            <p className="dev-college">John Bryce College · 2024</p>
+            <p className="dev-college">John Bryce College · 2026</p>
           </div>
         </div>
       </section>

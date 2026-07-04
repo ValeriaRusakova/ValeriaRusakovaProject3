@@ -142,6 +142,28 @@
   -webkit-box-orient: vertical;
   overflow:           hidden;
 }
+.card-desc.expanded {
+  display:  block;
+  overflow: visible;
+}
+.card-desc-toggle {
+  align-self:    flex-start;
+  width:         auto;
+  height:        auto;
+  padding:       0;
+  border:        none;
+  background:    transparent;
+  color:         var(--accent);
+  font-size:     var(--text-sm);
+  font-weight:   700;
+  cursor:        pointer;
+  text-align:    left;
+}
+.card-desc-toggle:hover,
+.card-desc-toggle:focus-visible {
+  color:   var(--accent-strong);
+  outline: none;
+}
 
 /* Meta row: dates + price */
 .card-meta {

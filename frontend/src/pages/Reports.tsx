@@ -5,8 +5,8 @@
 //
 // Features:
 //   • Summary cards: total vacations tracked, total likes, top destination
-//   • Horizontal bar chart sorted by likes (most liked on top)
-//   • Bars animate from 0 → target width on mount (CSS keyframe)
+//   • Vertical bar chart: X-axis destinations, Y-axis likes
+//   • Bars animate from 0 → target height on mount (CSS keyframe)
 //   • Download CSV button (uses api.downloadReportCsv)
 //   • Full loading + error + empty states
 
@@ -53,6 +53,12 @@ export default function Reports() {
   const topDest    = rows[0]?.destination ?? '—';
   // The maximum likes count is used to scale every bar to a percentage.
   const maxLikes   = rows[0]?.likesCount ?? 1; // rows is sorted desc, so first = max
+  const chartMax   = Math.max(maxLikes, 1);
+  const tickCount  = Math.min(chartMax, 5);
+  const yTicks     = Array.from(
+    { length: tickCount + 1 },
+    (_, index) => Math.round((chartMax / tickCount) * (tickCount - index)),
+  );
 
   return (
     <main className="reports-page">
@@ -102,34 +108,42 @@ export default function Reports() {
       {rows.length > 0 && (
         <section className="chart glass">
           <h2 className="chart-title">Likes per Destination</h2>
-          <p className="chart-subtitle">Sorted by most liked · {rows.length} destinations</p>
+          <p className="chart-subtitle">X-axis: destinations · Y-axis: likes</p>
 
-          <div className="bar-chart">
-            {rows.map((row, index) => {
-              const pct = (row.likesCount / maxLikes) * 100;
-              return (
-                <div key={row.destination} className="bar-item">
-                  <span className="bar-label" title={row.destination}>
-                    {row.destination}
-                  </span>
-                  <div className="bar-track">
-                    {/*
-                      CSS custom property --bar-width drives the @keyframes animation.
-                      Each bar animates from width:0 → --bar-width on mount.
-                      animation-delay staggers bars so they appear one after another.
-                    */}
-                    <div
-                      className="bar-fill"
-                      style={{
-                        '--bar-width': `${pct}%`,
-                        animationDelay: `${index * 60}ms`,
-                      } as React.CSSProperties}
-                    />
-                    <span className="bar-value">{row.likesCount}</span>
+          <div className="vertical-chart" aria-label="Likes per vacation destination">
+            <div className="y-axis" aria-hidden="true">
+              <span className="axis-title">Likes</span>
+              {yTicks.map(tick => (
+                <span key={tick} className="y-tick">{tick}</span>
+              ))}
+            </div>
+
+            <div className="bar-chart">
+              {rows.map((row, index) => {
+                const pct = (row.likesCount / chartMax) * 100;
+                return (
+                  <div key={row.destination} className="bar-item">
+                    <div className="bar-track">
+                      <span className="bar-value">{row.likesCount}</span>
+                      {/*
+                        CSS custom property --bar-height drives the @keyframes animation.
+                        Each bar animates from height:0 → --bar-height on mount.
+                      */}
+                      <div
+                        className="bar-fill"
+                        style={{
+                          '--bar-height': `${pct}%`,
+                          animationDelay: `${index * 60}ms`,
+                        } as React.CSSProperties}
+                      />
+                    </div>
+                    <span className="bar-label" title={row.destination}>
+                      {row.destination}
+                    </span>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </section>
       )}

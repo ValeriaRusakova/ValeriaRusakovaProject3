@@ -76,52 +76,100 @@
 }
 .chart-subtitle { font-size: var(--text-xs); color: var(--text-muted); margin-bottom: var(--sp-6); text-transform: uppercase; letter-spacing: 0.06em; }
 
-/* Bars */
-.bar-chart  { display: flex; flex-direction: column; gap: var(--sp-3); }
-.bar-item   { display: flex; align-items: center; gap: var(--sp-4); }
-
-.bar-label {
-  min-width: 140px; max-width: 140px;
-  font-size: var(--text-sm);
+/* Vertical chart: X-axis destinations, Y-axis likes */
+.vertical-chart {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: var(--sp-4);
+  min-height: 360px;
+}
+.y-axis {
+  display: grid;
+  grid-template-rows: auto repeat(6, 1fr);
+  align-items: center;
+  justify-items: end;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding-bottom: 74px;
+}
+.axis-title {
+  justify-self: center;
   color: var(--text-secondary);
-  text-align: right; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis;
-  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.y-tick { line-height: 1; }
+
+.bar-chart {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
+  align-items: end;
+  gap: var(--sp-3);
+  min-width: 0;
+  padding: var(--sp-5) var(--sp-2) 0;
+  border-left: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border-soft);
+  background:
+    linear-gradient(to top, var(--border-soft) 1px, transparent 1px) 0 0 / 100% 20%,
+    var(--surface-soft);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.bar-item {
+  display: grid;
+  grid-template-rows: 1fr 66px;
+  align-items: end;
+  min-width: 0;
+  height: 100%;
 }
 
 .bar-track {
-  flex: 1; position: relative;
-  height: 38px;
-  background: var(--surface-soft);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 250px;
   min-width: 0;
-  border: 1px solid var(--border-soft);
 }
 
 .bar-fill {
-  height: 100%;
-  width: var(--bar-width, 0%);
+  width: min(100%, 42px);
+  height: var(--bar-height, 0%);
   background: var(--accent-gradient);
-  border-radius: var(--radius-sm);
-  animation: growBar 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  animation: growBarVertical 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  box-shadow: 0 10px 18px rgba(46, 138, 143, 0.22);
 }
-@keyframes growBar { from { width: 0; } to { width: var(--bar-width, 100%); } }
+@keyframes growBarVertical { from { height: 0; } to { height: var(--bar-height, 100%); } }
 
 .bar-value {
-  position:  absolute;
-  right:     var(--sp-3);
-  top:       50%;
-  transform: translateY(-50%);
+  position: absolute;
+  bottom: calc(var(--bar-height, 0%) + var(--sp-2));
+  left: 50%;
+  transform: translateX(-50%);
   font-size: var(--text-sm);
   font-weight: 700;
-  color:     #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  color: var(--text);
   pointer-events: none;
 }
 
-@media (max-width: 500px) {
-  .bar-label      { min-width: 90px; max-width: 90px; font-size: var(--text-xs); }
-  .chart          { padding: var(--sp-5); }
+.bar-label {
+  align-self: start;
+  margin-top: var(--sp-3);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  text-align: right;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transform: rotate(-45deg);
+  transform-origin: top right;
+  max-width: 92px;
+}
+
+@media (max-width: 640px) {
+  .chart          { padding: var(--sp-5); overflow-x: auto; }
   .reports-header { flex-direction: column; align-items: flex-start; }
+  .vertical-chart { min-width: 720px; }
 }
