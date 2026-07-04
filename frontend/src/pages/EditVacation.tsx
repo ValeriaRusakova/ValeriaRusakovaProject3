@@ -8,7 +8,7 @@
 //
 // Validation rules (same as Add except where noted):
 //   • Destination / Description — required
-//   • Start date — required; PAST DATES ARE ALLOWED
+//   • Existing active start date may be kept, but new past dates are blocked
 //   • End date   — required; must be ≥ start date
 //   • Price      — required; 0 – 10,000
 //   • Image      — OPTIONAL; if provided it replaces the current one
@@ -33,6 +33,14 @@ function toDateInput(dateStr: string): string {
   return dateStr.split('T')[0];
 }
 
+function getTodayDateInput(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 // One optional error string per field.
 type FieldErrors = {
   destination?: string;
@@ -47,6 +55,7 @@ export default function EditVacation() {
   const navigate = useNavigate();
   const location = useLocation();
   const state    = location.state as LocationState | null;
+  const today    = getTodayDateInput();
 
   const [form, setForm] = useState({
     destination: '',
@@ -62,6 +71,7 @@ export default function EditVacation() {
   const [currentImage,    setCurrentImage]    = useState('');
   const [newImage,        setNewImage]        = useState<File | null>(null);
   const [newImagePreview, setNewImagePreview] = useState('');
+  const [originalDates,   setOriginalDates]   = useState({ startDate: '', endDate: '' });
 
   const [errors,      setErrors]      = useState<FieldErrors>({});
   const [serverError, setServerError] = useState('');
@@ -87,13 +97,17 @@ export default function EditVacation() {
   }, []);
 
   function fillForm(v: Vacation) {
+    const startDate = toDateInput(v.startDate);
+    const endDate = toDateInput(v.endDate);
+
     setForm({
       destination: v.destination,
       description: v.description,
-      startDate:   toDateInput(v.startDate),
-      endDate:     toDateInput(v.endDate),
+      startDate,
+      endDate,
       price:       String(v.price),
     });
+    setOriginalDates({ startDate, endDate });
     setCurrentImage(v.imageFileName ?? '');
   }
 
@@ -102,8 +116,39 @@ export default function EditVacation() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: undefined }));
+
+    if (name === 'startDate' && value && value < today && value !== originalDates.startDate) {
+      setForm(prev => ({ ...prev, startDate: originalDates.startDate, endDate: originalDates.endDate }));
+      setErrors(prev => ({ ...prev, startDate: 'Start date cannot be in the past' }));
+      return;
+    }
+
+    if (name === 'endDate') {
+      const minEndDate = form.startDate || today;
+      if (value && value < minEndDate && value !== originalDates.endDate) {
+        setForm(prev => ({ ...prev, endDate: originalDates.endDate }));
+        setErrors(prev => ({
+          ...prev,
+          endDate: form.startDate
+            ? 'End date cannot be before start date'
+            : 'End date cannot be in the past',
+        }));
+        return;
+      }
+    }
+
+    setForm(prev => {
+      const next = { ...prev, [name]: value };
+      if (name === 'startDate' && next.endDate && next.endDate < value) {
+        next.endDate = '';
+      }
+      return next;
+    });
+    setErrors(prev => ({
+      ...prev,
+      [name]: undefined,
+      ...(name === 'startDate' ? { endDate: undefined } : {}),
+    }));
   }
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -124,14 +169,18 @@ export default function EditVacation() {
       price:       validatePrice(form.price) ?? undefined,
     };
 
-    // Start date — required only (past dates are allowed for edits)
+    // Start date — required. Existing active start date may be in the past.
     if (!form.startDate) {
       next.startDate = 'Start date is required';
+    } else if (form.startDate < today && form.startDate !== originalDates.startDate) {
+      next.startDate = 'Start date cannot be in the past';
     }
 
     // End date — required + must be ≥ start date
     if (!form.endDate) {
       next.endDate = 'End date is required';
+    } else if (form.endDate < today && form.endDate !== originalDates.endDate) {
+      next.endDate = 'End date cannot be in the past';
     } else if (form.startDate && form.endDate < form.startDate) {
       next.endDate = 'End date cannot be before start date';
     }
@@ -218,6 +267,7 @@ export default function EditVacation() {
               id="startDate"
               name="startDate"
               type="date"
+              min={originalDates.startDate && originalDates.startDate < today ? originalDates.startDate : today}
               value={form.startDate}
               onChange={handleChange}
               className={errors.startDate ? 'input-error' : ''}
@@ -231,6 +281,7 @@ export default function EditVacation() {
               id="endDate"
               name="endDate"
               type="date"
+              min={form.startDate || today}
               value={form.endDate}
               onChange={handleChange}
               className={errors.endDate ? 'input-error' : ''}

@@ -27,8 +27,17 @@ type FieldErrors = {
   image?:       string;
 };
 
+function getTodayDateInput(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export default function AddVacation() {
   const navigate = useNavigate();
+  const today = getTodayDateInput();
 
   const [form, setForm] = useState({
     destination: '',
@@ -49,8 +58,39 @@ export default function AddVacation() {
   // Clear the matching field error as soon as the user edits that field.
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: undefined }));
+
+    if (name === 'startDate' && value && value < today) {
+      setForm(prev => ({ ...prev, startDate: '', endDate: '' }));
+      setErrors(prev => ({ ...prev, startDate: 'Start date cannot be in the past' }));
+      return;
+    }
+
+    if (name === 'endDate') {
+      const minEndDate = form.startDate || today;
+      if (value && value < minEndDate) {
+        setForm(prev => ({ ...prev, endDate: '' }));
+        setErrors(prev => ({
+          ...prev,
+          endDate: form.startDate
+            ? 'End date cannot be before start date'
+            : 'End date cannot be in the past',
+        }));
+        return;
+      }
+    }
+
+    setForm(prev => {
+      const next = { ...prev, [name]: value };
+      if (name === 'startDate' && next.endDate && next.endDate < value) {
+        next.endDate = '';
+      }
+      return next;
+    });
+    setErrors(prev => ({
+      ...prev,
+      [name]: undefined,
+      ...(name === 'startDate' ? { endDate: undefined } : {}),
+    }));
   }
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -66,8 +106,6 @@ export default function AddVacation() {
   // Validates every field and stores per-field errors.
   // Returns true only when there are zero errors.
   function validate(): boolean {
-    const today = new Date().toISOString().split('T')[0];
-
     const next: FieldErrors = {
       destination: validateRequired(form.destination, 'Destination') ?? undefined,
       description: validateRequired(form.description, 'Description') ?? undefined,
@@ -168,6 +206,7 @@ export default function AddVacation() {
               id="startDate"
               name="startDate"
               type="date"
+              min={today}
               value={form.startDate}
               onChange={handleChange}
               className={errors.startDate ? 'input-error' : ''}
@@ -181,6 +220,7 @@ export default function AddVacation() {
               id="endDate"
               name="endDate"
               type="date"
+              min={form.startDate || today}
               value={form.endDate}
               onChange={handleChange}
               className={errors.endDate ? 'input-error' : ''}

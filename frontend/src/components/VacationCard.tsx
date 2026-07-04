@@ -60,6 +60,7 @@ export default function VacationCard({
     : '';
 
   const status = getStatus(vacation.startDate, vacation.endDate);
+  const isPastVacation = status.cls === 'status-past';
   const canToggleDescription = !isAdmin && vacation.description.length > 180;
 
   function handleDeleteClick() {
@@ -128,12 +129,14 @@ export default function VacationCard({
           {/* Admin: Edit + Delete (or inline confirm) */}
           {isAdmin && !confirming && (
             <>
-              <button
-                className="btn-edit"
-                onClick={() => onEdit?.(vacation.id)}
-              >
-                ✏️ Edit
-              </button>
+              {!isPastVacation && (
+                <button
+                  className="btn-edit"
+                  onClick={() => onEdit?.(vacation.id)}
+                >
+                  ✏️ Edit
+                </button>
+              )}
               <button
                 className="btn-delete"
                 onClick={handleDeleteClick}

@@ -26,14 +26,20 @@ const toVacationResponse = (vacation: VacationRow, likesCount = 0, isLiked = fal
   isLiked,
 });
 
-const validateVacationInput = (body: VacationUpsertBody, allowPastStartDate: boolean) => {
+const toDateKey = (date: string | Date): string => {
+  if (typeof date === 'string') return date.split('T')[0] ?? '';
+  return date.toISOString().split('T')[0] ?? '';
+};
+
+const validateVacationInput = (body: VacationUpsertBody, allowPastStartDate: boolean, existingVacation?: VacationRow) => {
   const destination = body.destination?.trim();
   const description = body.description?.trim();
   const startDate = body.start_date;
   const endDate = body.end_date;
+  const priceValue = body.price;
   const price = Number(body.price);
 
-  if (!destination || !description || !startDate || !endDate || Number.isNaN(price)) {
+  if (!destination || !description || !startDate || !endDate || priceValue === undefined || priceValue === null || priceValue === '' || !Number.isFinite(price)) {
     return { message: 'All fields are required' };
   }
 
@@ -54,8 +60,17 @@ const validateVacationInput = (body: VacationUpsertBody, allowPastStartDate: boo
     return { message: 'End date cannot be before start date' };
   }
 
-  if (!allowPastStartDate && start < today) {
+  const existingStartDate = existingVacation ? toDateKey(existingVacation.start_date) : '';
+  const existingEndDate = existingVacation ? toDateKey(existingVacation.end_date) : '';
+  const keepsExistingStartDate = allowPastStartDate && startDate === existingStartDate;
+  const keepsExistingEndDate = allowPastStartDate && endDate === existingEndDate;
+
+  if (start < today && !keepsExistingStartDate) {
     return { message: 'Start date cannot be in the past' };
+  }
+
+  if (end < today && !keepsExistingEndDate) {
+    return { message: 'End date cannot be in the past' };
   }
 
   return null;
@@ -148,14 +163,28 @@ export const createVacation = async (body: VacationUpsertBody) => {
 
   const [result] = await pool.query<ResultSetHeader>(
     'INSERT INTO vacations (destination, description, start_date, end_date, price, image_filename) VALUES (?, ?, ?, ?, ?, ?)',
-    [body.destination.trim(), body.description.trim(), body.start_date, body.end_date, body.price, body.image_filename ?? null],
+    [body.destination.trim(), body.description.trim(), body.start_date, body.end_date, Number(body.price), body.image_filename ?? null],
   );
 
   return { status: 201, body: { vacationId: result.insertId } };
 };
 
 export const updateVacation = async (vacationId: number, body: VacationUpsertBody) => {
-  const validationError = validateVacationInput(body, true);
+  const [existingRows] = await pool.query<VacationRow[]>('SELECT * FROM vacations WHERE vacation_id = ?', [vacationId]);
+  const existingVacation = existingRows[0];
+
+  if (!existingVacation) {
+    return { status: 404, body: { message: 'Vacation not found' } };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const existingEndDate = new Date(existingVacation.end_date);
+  if (existingEndDate < today) {
+    return { status: 400, body: { message: 'Cannot edit a vacation that has already ended' } };
+  }
+
+  const validationError = validateVacationInput(body, true, existingVacation);
   if (validationError) {
     return { status: 400, body: validationError };
   }
@@ -164,11 +193,11 @@ export const updateVacation = async (vacationId: number, body: VacationUpsertBod
   const [result] = hasImageUpdate
     ? await pool.query<ResultSetHeader>(
       'UPDATE vacations SET destination = ?, description = ?, start_date = ?, end_date = ?, price = ?, image_filename = ? WHERE vacation_id = ?',
-      [body.destination.trim(), body.description.trim(), body.start_date, body.end_date, body.price, body.image_filename ?? null, vacationId],
+      [body.destination.trim(), body.description.trim(), body.start_date, body.end_date, Number(body.price), body.image_filename ?? null, vacationId],
     )
     : await pool.query<ResultSetHeader>(
       'UPDATE vacations SET destination = ?, description = ?, start_date = ?, end_date = ?, price = ? WHERE vacation_id = ?',
-      [body.destination.trim(), body.description.trim(), body.start_date, body.end_date, body.price, vacationId],
+      [body.destination.trim(), body.description.trim(), body.start_date, body.end_date, Number(body.price), vacationId],
     );
 
   if (result.affectedRows === 0) {

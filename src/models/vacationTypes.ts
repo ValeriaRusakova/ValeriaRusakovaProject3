@@ -19,6 +19,6 @@ export interface VacationUpsertBody {
   description: string;
   start_date: string;
   end_date: string;
-  price: number;
+  price: number | string;
   image_filename?: string | null;
 }

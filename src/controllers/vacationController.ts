@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import fs from 'fs/promises';
 import type { AuthenticatedRequest } from '../middleware/auth';
 import type { VacationUpsertBody } from '../models/vacationTypes';
 import { createVacation, deleteVacation, getVacationById, getVacations, updateVacation } from '../services/vacationService';
@@ -14,7 +15,7 @@ const normalizeVacationBody = (body: VacationFormBody, imageFilename?: string | 
     description: body.description,
     start_date: body.start_date ?? body.startDate ?? '',
     end_date: body.end_date ?? body.endDate ?? '',
-    price: Number(body.price),
+    price: body.price,
   };
 
   if (imageFilename !== undefined) {
@@ -22,6 +23,16 @@ const normalizeVacationBody = (body: VacationFormBody, imageFilename?: string | 
   }
 
   return normalized;
+};
+
+const removeUploadedFile = async (file?: Express.Multer.File): Promise<void> => {
+  if (!file?.path) return;
+
+  try {
+    await fs.unlink(file.path);
+  } catch {
+    // Best effort cleanup only; the validation response is more important.
+  }
 };
 
 export const listVacations = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -69,11 +80,19 @@ export const vacationById = async (req: AuthenticatedRequest, res: Response): Pr
 export const addVacation = async (req: Request<unknown, unknown, VacationFormBody>, res: Response): Promise<void> => {
   try {
     const file = (req as Request & { file?: Express.Multer.File }).file;
-    const imageFilename = file ? file.filename : (req.body.image_filename ?? null);
-    const body = normalizeVacationBody(req.body, imageFilename);
+    if (!file) {
+      res.status(400).json({ message: 'Vacation photo is required' });
+      return;
+    }
+
+    const body = normalizeVacationBody(req.body, file.filename);
     const result = await createVacation(body);
+    if (result.status >= 400) {
+      await removeUploadedFile(file);
+    }
     res.status(result.status).json(result.body);
   } catch {
+    await removeUploadedFile((req as Request & { file?: Express.Multer.File }).file);
     res.status(500).json({ message: 'Failed to create vacation' });
   }
 };
@@ -81,11 +100,15 @@ export const addVacation = async (req: Request<unknown, unknown, VacationFormBod
 export const editVacation = async (req: Request<{ id: string }, unknown, VacationFormBody>, res: Response): Promise<void> => {
   try {
     const file = (req as Request & { file?: Express.Multer.File }).file;
-    const imageFilename = file ? file.filename : req.body.image_filename;
+    const imageFilename = file ? file.filename : undefined;
     const body = normalizeVacationBody(req.body, imageFilename);
     const result = await updateVacation(Number(req.params.id), body);
+    if (result.status >= 400) {
+      await removeUploadedFile(file);
+    }
     res.status(result.status).json(result.body);
   } catch {
+    await removeUploadedFile((req as Request & { file?: Express.Multer.File }).file);
     res.status(500).json({ message: 'Failed to update vacation' });
   }
 };
