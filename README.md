@@ -1,5 +1,7 @@
 # Valeria Rusakova Project 3
 
+https://github.com/ValeriaRusakova/ValeriaRusakovaProject3
+
 Full-stack vacation platform with a Node.js + TypeScript backend, MySQL, and a React + Vite frontend.
 
 ## Project Structure
