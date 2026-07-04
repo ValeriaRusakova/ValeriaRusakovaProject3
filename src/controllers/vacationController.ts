@@ -3,6 +3,27 @@ import type { AuthenticatedRequest } from '../middleware/auth';
 import type { VacationUpsertBody } from '../models/vacationTypes';
 import { createVacation, deleteVacation, getVacationById, getVacations, updateVacation } from '../services/vacationService';
 
+type VacationFormBody = VacationUpsertBody & {
+  startDate?: string;
+  endDate?: string;
+};
+
+const normalizeVacationBody = (body: VacationFormBody, imageFilename?: string | null): VacationUpsertBody => {
+  const normalized: VacationUpsertBody = {
+    destination: body.destination,
+    description: body.description,
+    start_date: body.start_date ?? body.startDate ?? '',
+    end_date: body.end_date ?? body.endDate ?? '',
+    price: Number(body.price),
+  };
+
+  if (imageFilename !== undefined) {
+    normalized.image_filename = imageFilename;
+  }
+
+  return normalized;
+};
+
 export const listVacations = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const user = req.user;
@@ -45,11 +66,11 @@ export const vacationById = async (req: AuthenticatedRequest, res: Response): Pr
   }
 };
 
-export const addVacation = async (req: Request<unknown, unknown, VacationUpsertBody>, res: Response): Promise<void> => {
+export const addVacation = async (req: Request<unknown, unknown, VacationFormBody>, res: Response): Promise<void> => {
   try {
     const file = (req as Request & { file?: Express.Multer.File }).file;
     const imageFilename = file ? file.filename : (req.body.image_filename ?? null);
-    const body: VacationUpsertBody = { ...req.body, image_filename: imageFilename };
+    const body = normalizeVacationBody(req.body, imageFilename);
     const result = await createVacation(body);
     res.status(result.status).json(result.body);
   } catch {
@@ -57,11 +78,11 @@ export const addVacation = async (req: Request<unknown, unknown, VacationUpsertB
   }
 };
 
-export const editVacation = async (req: Request<{ id: string }, unknown, VacationUpsertBody>, res: Response): Promise<void> => {
+export const editVacation = async (req: Request<{ id: string }, unknown, VacationFormBody>, res: Response): Promise<void> => {
   try {
     const file = (req as Request & { file?: Express.Multer.File }).file;
-    const imageFilename = file ? file.filename : (req.body.image_filename ?? null);
-    const body: VacationUpsertBody = { ...req.body, image_filename: imageFilename };
+    const imageFilename = file ? file.filename : req.body.image_filename;
+    const body = normalizeVacationBody(req.body, imageFilename);
     const result = await updateVacation(Number(req.params.id), body);
     res.status(result.status).json(result.body);
   } catch {

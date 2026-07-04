@@ -12,12 +12,15 @@ export const getVacationLikesReport = async () => {
     `,
   );
 
-  return rows as Array<{ destination: string; likes: number }>;
+  return rows.map((row) => ({
+    destination: String(row.destination),
+    likesCount: Number(row.likes ?? 0),
+  }));
 };
 
 export const buildVacationLikesCsv = async () => {
   const rows = await getVacationLikesReport();
   const header = 'Destination,Likes';
-  const body = rows.map((row) => `${row.destination.replace(/"/g, '""')},${row.likes}`).join('\n');
+  const body = rows.map((row) => `${row.destination.replace(/"/g, '""')},${row.likesCount}`).join('\n');
   return `${header}\n${body}`;
 };

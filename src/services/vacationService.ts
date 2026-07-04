@@ -160,10 +160,16 @@ export const updateVacation = async (vacationId: number, body: VacationUpsertBod
     return { status: 400, body: validationError };
   }
 
-  const [result] = await pool.query<ResultSetHeader>(
-    'UPDATE vacations SET destination = ?, description = ?, start_date = ?, end_date = ?, price = ?, image_filename = ? WHERE vacation_id = ?',
-    [body.destination.trim(), body.description.trim(), body.start_date, body.end_date, body.price, body.image_filename ?? null, vacationId],
-  );
+  const hasImageUpdate = body.image_filename !== undefined;
+  const [result] = hasImageUpdate
+    ? await pool.query<ResultSetHeader>(
+      'UPDATE vacations SET destination = ?, description = ?, start_date = ?, end_date = ?, price = ?, image_filename = ? WHERE vacation_id = ?',
+      [body.destination.trim(), body.description.trim(), body.start_date, body.end_date, body.price, body.image_filename ?? null, vacationId],
+    )
+    : await pool.query<ResultSetHeader>(
+      'UPDATE vacations SET destination = ?, description = ?, start_date = ?, end_date = ?, price = ? WHERE vacation_id = ?',
+      [body.destination.trim(), body.description.trim(), body.start_date, body.end_date, body.price, vacationId],
+    );
 
   if (result.affectedRows === 0) {
     return { status: 404, body: { message: 'Vacation not found' } };
