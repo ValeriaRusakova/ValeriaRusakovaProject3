@@ -5,6 +5,7 @@ import { authenticateJwt } from '../middleware/auth';
 const router = Router();
 
 router.use(authenticateJwt);
+router.post('/', getRecommendation);
 router.post('/recommendation', getRecommendation);
 
 export default router;

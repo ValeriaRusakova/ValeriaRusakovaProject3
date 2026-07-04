@@ -13,6 +13,7 @@ index.d.ts.map
 # Environment and local secrets
 .env
 .env.*
+env/*.env
 test-users.md
 
 # Logs

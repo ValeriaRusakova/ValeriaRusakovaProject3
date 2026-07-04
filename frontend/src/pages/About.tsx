@@ -18,7 +18,7 @@ const TECH_STACK = [
   { icon: '🐬',  label: 'MySQL 8'        },
   { icon: '🔐',  label: 'JWT + bcrypt'   },
   { icon: '🐳',  label: 'Docker'         },
-  { icon: '🤖',  label: 'OpenAI API'     },
+  { icon: '🤖',  label: 'NVIDIA API'     },
   { icon: '🔗',  label: 'MCP Protocol'   },
 ];
 
