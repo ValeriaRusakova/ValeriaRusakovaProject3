@@ -130,12 +130,12 @@ export default function VacationCard({
           {isAdmin && !confirming && (
             <>
               {!isPastVacation && (
-                <button
+                <a
+                  href={`/edit-vacation/${vacation.id}`}
                   className="btn-edit"
-                  onClick={() => onEdit?.(vacation.id)}
                 >
                   ✏️ Edit
-                </button>
+                </a>
               )}
               <button
                 className="btn-delete"

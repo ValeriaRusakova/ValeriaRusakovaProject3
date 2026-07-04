@@ -96,6 +96,11 @@
 .btn-submit:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
 .btn-submit:disabled             { opacity: 0.55; cursor: not-allowed; }
 
+.btn-update {
+  transition: background var(--t-fast), box-shadow var(--t-fast), opacity var(--t-fast);
+}
+.btn-update:hover:not(:disabled) { transform: none; }
+
 @media (max-width: 500px) {
   .vacation-form { padding: var(--sp-8) var(--sp-5); }
   .form-actions  { flex-direction: column-reverse; }

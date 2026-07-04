@@ -189,8 +189,7 @@ export default function EditVacation() {
     return !Object.values(next).some(Boolean);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function saveVacation() {
     setServerError('');
     if (!validate()) return;
 
@@ -214,6 +213,11 @@ export default function EditVacation() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    void saveVacation();
   }
 
   // Full-page spinner while the API fetch loads the vacation data.
@@ -356,9 +360,10 @@ export default function EditVacation() {
             Cancel
           </button>
           <button
-            type="submit"
-            className="btn-submit"
+            type="button"
+            className="btn-submit btn-update"
             disabled={loading}
+            onClick={saveVacation}
           >
             {loading ? 'Saving…' : 'Save Changes'}
           </button>
